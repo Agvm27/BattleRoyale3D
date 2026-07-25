@@ -13,6 +13,81 @@
     #left-zone { left: 0; width: 50%; }
     #right-zone { right: 0; width: 50%; }
 
+    /* HUD Elements */
+    .hud-element {
+      position: absolute;
+      color: #ffffff;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px #000;
+      z-index: 20;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 14px;
+    }
+
+    #score-board {
+      top: 15px; left: 15px;
+    }
+
+    #enemy-count {
+      top: 60px; left: 15px;
+    }
+
+    #weapon-display {
+      top: 105px; left: 15px;
+    }
+
+    #ammo-display {
+      top: 150px; left: 15px;
+    }
+
+    #health-bar-container {
+      position: absolute;
+      bottom: 15px; left: 15px;
+      width: 180px;
+    }
+
+    #health-label {
+      color: #ff6666;
+      font-size: 12px;
+      margin-bottom: 3px;
+    }
+
+    #health-bar {
+      width: 100%;
+      height: 20px;
+      background: rgba(0,0,0,0.6);
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    #health-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ff3333, #ffff00);
+      width: 100%;
+      transition: width 0.2s;
+    }
+
+    #shield-bar {
+      width: 100%;
+      height: 15px;
+      background: rgba(0,0,0,0.6);
+      border: 2px solid rgba(100,200,255,0.3);
+      border-radius: 5px;
+      overflow: hidden;
+      margin-top: 5px;
+    }
+
+    #shield-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3388ff, #00ffff);
+      width: 0%;
+      transition: width 0.2s;
+    }
+
     /* Joystick */
     #joystick-base {
       position: absolute;
@@ -35,7 +110,7 @@
       pointer-events: none;
     }
 
-    /* Mira táctica */
+    /* Crosshair */
     #crosshair {
       position: absolute;
       top: 50%; left: 50%;
@@ -62,7 +137,7 @@
       transform: translate(-50%, -50%);
     }
 
-    /* Botones Táctiles */
+    /* Action Buttons */
     .action-btn {
       position: absolute;
       border-radius: 50%;
@@ -74,6 +149,8 @@
       z-index: 30;
       box-shadow: 0 4px 15px rgba(0,0,0,0.5);
       cursor: pointer;
+      text-align: center;
+      font-size: 12px;
     }
 
     #shoot-btn {
@@ -81,7 +158,6 @@
       width: 85px; height: 85px;
       background: radial-gradient(circle, #ff4444 0%, #cc0000 100%);
       border: 3px solid #ffffff;
-      font-size: 13px;
     }
 
     #aim-btn {
@@ -89,28 +165,45 @@
       width: 65px; height: 65px;
       background: radial-gradient(circle, #3388ff 0%, #0044cc 100%);
       border: 2px solid #ffffff;
-      font-size: 11px;
     }
     #aim-btn.active {
       background: radial-gradient(circle, #00ffcc 0%, #008866 100%);
       box-shadow: 0 0 15px #00ffcc;
     }
 
-    .action-btn:active { transform: scale(0.90); }
-
-    #score-board {
-      position: absolute;
-      top: 15px; left: 15px;
-      color: #ffffff;
-      font-size: 16px;
-      font-weight: 800;
-      text-shadow: 2px 2px 4px #000;
-      z-index: 20;
-      background: rgba(0, 0, 0, 0.4);
-      padding: 6px 14px;
-      border-radius: 15px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
+    #sprint-btn {
+      bottom: 215px; right: 35px;
+      width: 60px; height: 60px;
+      background: radial-gradient(circle, #ff9900 0%, #cc6600 100%);
+      border: 2px solid #ffffff;
+      font-size: 10px;
     }
+    #sprint-btn.active {
+      background: radial-gradient(circle, #ffff00 0%, #ffcc00 100%);
+      box-shadow: 0 0 12px #ffff00;
+    }
+
+    #grenade-btn {
+      bottom: 310px; right: 35px;
+      width: 55px; height: 55px;
+      background: radial-gradient(circle, #00cc00 0%, #009900 100%);
+      border: 2px solid #ffffff;
+      font-size: 10px;
+    }
+
+    #shield-btn {
+      bottom: 120px; right: 110px;
+      width: 60px; height: 60px;
+      background: radial-gradient(circle, #00ccff 0%, #0099cc 100%);
+      border: 2px solid #ffffff;
+      font-size: 10px;
+    }
+    #shield-btn.active {
+      background: radial-gradient(circle, #ffff00 0%, #ffcc00 100%);
+      box-shadow: 0 0 12px #ffff00;
+    }
+
+    .action-btn:active { transform: scale(0.90); }
 
     #horizontal-hint {
       position: absolute;
@@ -124,49 +217,67 @@
       pointer-events: none;
     }
 
-    #health-bar {
+    #sprint-indicator {
       position: absolute;
-      bottom: 15px; left: 15px;
-      width: 150px;
-      height: 20px;
+      bottom: 50px; right: 15px;
+      width: 100px;
+      height: 8px;
       background: rgba(0,0,0,0.6);
-      border: 2px solid rgba(255,255,255,0.3);
-      border-radius: 5px;
+      border: 1px solid rgba(255,200,0,0.3);
+      border-radius: 4px;
       overflow: hidden;
     }
 
-    #health-fill {
+    #sprint-fill {
       height: 100%;
-      background: linear-gradient(90deg, #ff3333, #ffff00);
+      background: linear-gradient(90deg, #ffff00, #ff9900);
       width: 100%;
-      transition: width 0.2s;
+      transition: width 0.1s;
     }
 
-    #enemy-count {
+    #grenade-count {
       position: absolute;
-      top: 50px; left: 15px;
-      color: #ff6666;
-      font-size: 14px;
+      bottom: 330px; right: 35px;
+      font-size: 10px;
+      color: #00ff00;
       font-weight: bold;
-      background: rgba(0, 0, 0, 0.4);
-      padding: 5px 12px;
-      border-radius: 10px;
-      border: 1px solid rgba(255, 100, 100, 0.3);
+      text-shadow: 1px 1px 2px #000;
     }
   </style>
 </head>
 <body>
   <div id="canvas-container"></div>
-  <div id="score-board">🎯 KILLS: <span id="score">0</span></div>
-  <div id="enemy-count">👾 ENEMIGOS: <span id="enemy-total">12</span></div>
-  <div id="health-bar">
-    <div id="health-fill"></div>
+  
+  <!-- HUD Elements -->
+  <div id="score-board" class="hud-element">🎯 KILLS: <span id="score">0</span></div>
+  <div id="enemy-count" class="hud-element">👾 ENEMIGOS: <span id="enemy-total">12</span></div>
+  <div id="weapon-display" class="hud-element">🔫 ARMA: <span id="weapon-name">Rifle</span></div>
+  <div id="ammo-display" class="hud-element">🔫 MUNICIÓN: <span id="ammo">∞</span></div>
+  
+  <div id="health-bar-container">
+    <div id="health-label">❤️ SALUD</div>
+    <div id="health-bar">
+      <div id="health-fill"></div>
+    </div>
+    <div id="shield-bar">
+      <div id="shield-fill"></div>
+    </div>
   </div>
+
+  <div id="sprint-indicator">
+    <div id="sprint-fill"></div>
+  </div>
+
   <div id="horizontal-hint">🎮 MODO HORIZONTAL</div>
   <div id="crosshair"></div>
 
+  <!-- Action Buttons -->
   <div id="aim-btn" class="action-btn">MIRA</div>
   <div id="shoot-btn" class="action-btn">FUEGO</div>
+  <div id="sprint-btn" class="action-btn">SPRINT</div>
+  <div id="shield-btn" class="action-btn">ESCUDO</div>
+  <div id="grenade-btn" class="action-btn">GRANADA</div>
+  <div id="grenade-count"></div>
 
   <div id="left-zone" class="touch-zone"></div>
   <div id="right-zone" class="touch-zone"></div>
@@ -198,11 +309,10 @@
 
     const sunLight = new THREE.DirectionalLight(0xfffaed, 0.85);
     sunLight.position.set(120, 180, 120);
-    sunLight.castShadow = true;
     scene.add(sunLight);
 
     // ============================================
-    // 2. TERRENO (600 x 600)
+    // 2. TERRENO
     // ============================================
     const mapSize = 600;
     const terrainGeo = new THREE.PlaneGeometry(mapSize, mapSize, 120, 120);
@@ -238,7 +348,6 @@
     const terrain = new THREE.Mesh(terrainGeo, terrainMat);
     scene.add(terrain);
 
-    // AGUA
     const waterGeo = new THREE.PlaneGeometry(mapSize, mapSize);
     const waterMat = new THREE.MeshLambertMaterial({ color: 0x0077be, transparent: true, opacity: 0.65 });
     const water = new THREE.Mesh(waterGeo, waterMat);
@@ -307,7 +416,6 @@
       scene.add(boulderGroup);
     }
 
-    // CÉSPED ANIMADO
     const grassTufts = [];
     const grassColors = [0x55cc44, 0x44bb33, 0x66dd55];
     
@@ -329,7 +437,6 @@
       grassTufts.push(tuft);
     }
 
-    // Poblar Mapa
     for(let i = 0; i < 110; i++) createTree((Math.random() - 0.5) * 520, (Math.random() - 0.5) * 520);
     for(let i = 0; i < 50; i++) createCoverBoulder((Math.random() - 0.5) * 520, (Math.random() - 0.5) * 520);
     for(let i = 0; i < 220; i++) createGrassTuft((Math.random() - 0.5) * 520, (Math.random() - 0.5) * 520);
@@ -393,7 +500,6 @@
     const player = createHumanoid(0x0055ff, 0x00ffff);
     scene.add(player.group);
 
-    // ARMA EN PRIMERA PERSONA
     const fpsGunGroup = new THREE.Group();
     const fpsGunMat = new THREE.MeshLambertMaterial({ color: 0x1a1a1a, flatShading: true });
     const fpsGunBody = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.22, 0.9), fpsGunMat);
@@ -406,13 +512,83 @@
     fpsGunGroup.visible = false;
 
     // ============================================
-    // 5. BOTS ENEMIGOS
+    // 5. SISTEMA DE ARMAS MEJORADO
+    // ============================================
+    const weapons = {
+      rifle: { damage: 25, fireRate: 10, ammo: Infinity, speed: 0.8, name: '🔫 Rifle' },
+      shotgun: { damage: 40, fireRate: 20, ammo: Infinity, speed: 0.5, name: '🔫 Escopeta' },
+      machinegun: { damage: 15, fireRate: 5, ammo: Infinity, speed: 1.0, name: '🔫 Metralleta' },
+      sniper: { damage: 60, fireRate: 30, ammo: Infinity, speed: 1.2, name: '🔫 Sniper' }
+    };
+
+    let currentWeapon = 'rifle';
+    let shootCooldown = 0;
+
+    const weaponNameDisplay = document.getElementById('weapon-name');
+    const ammoDisplay = document.getElementById('ammo');
+
+    // ============================================
+    // 6. EFECTOS DE PARTÍCULAS
+    // ============================================
+    const particles = [];
+
+    function createExplosion(pos, size = 1.0) {
+      for (let i = 0; i < 15; i++) {
+        const particle = new THREE.Mesh(
+          new THREE.SphereGeometry(0.15, 4, 4),
+          new THREE.MeshBasicMaterial({ color: Math.random() > 0.5 ? 0xff6600 : 0xffff00 })
+        );
+        particle.position.copy(pos);
+        particle.velocity = new THREE.Vector3(
+          (Math.random() - 0.5) * 0.5 * size,
+          (Math.random() * 0.4 + 0.1) * size,
+          (Math.random() - 0.5) * 0.5 * size
+        );
+        particle.life = 20;
+        scene.add(particle.mesh = particle);
+        particles.push(particle);
+      }
+    }
+
+    // ============================================
+    // 7. POWER-UPS
+    // ============================================
+    const powerups = [];
+
+    function createPowerUp(type, x, z) {
+      const powerupTypes = {
+        health: { color: 0xff0000, symbol: '❤️', effect: () => { playerHealth = Math.min(100, playerHealth + 30); } },
+        shield: { color: 0x00ccff, symbol: '🛡️', effect: () => { playerShield = Math.min(100, playerShield + 50); } },
+        ammo: { color: 0xffff00, symbol: '🔫', effect: () => { Object.keys(weapons).forEach(w => weapons[w].ammo += 50); } },
+        speed: { color: 0x00ff00, symbol: '⚡', effect: () => { speedBoost = 150; moveSpeed = 0.35; } }
+      };
+
+      const config = powerupTypes[type];
+      const geometry = new THREE.IcosahedronGeometry(0.5, 3);
+      const material = new THREE.MeshStandardMaterial({ color: config.color, emissive: config.color, emissiveIntensity: 0.5 });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.set(x, getTerrainHeight(x, z) + 1, z);
+      
+      scene.add(mesh);
+      powerups.push({ mesh, type, effect: config.effect, life: 300 });
+    }
+
+    // ============================================
+    // 8. BOTS ENEMIGOS
     // ============================================
     let score = 0;
     let playerHealth = 100;
+    let playerShield = 0;
+    let grenadeCount = 3;
+    let speedBoost = 0;
+    let shieldActive = false;
+
     const scoreElem = document.getElementById('score');
     const healthFill = document.getElementById('health-fill');
+    const shieldFill = document.getElementById('shield-fill');
     const enemyCountElem = document.getElementById('enemy-total');
+    const grenadeCountElem = document.getElementById('grenade-count');
+
     const targets = [];
     const initialBotCount = 12;
 
@@ -430,14 +606,18 @@
     for (let i = 0; i < initialBotCount; i++) spawnBot();
 
     // ============================================
-    // 6. APUNTADO Y DISPARO
+    // 9. APUNTADO Y DISPARO
     // ============================================
     let isAiming = false;
+    let isSprinting = false;
     let recoilAnim = 0;
-    let shootCooldown = 0;
 
     const aimBtn = document.getElementById('aim-btn');
+    const sprintBtn = document.getElementById('sprint-btn');
+    const shieldBtn = document.getElementById('shield-btn');
+    const grenadeBtn = document.getElementById('grenade-btn');
     const crosshair = document.getElementById('crosshair');
+    const sprintFill = document.getElementById('sprint-fill');
 
     function setAimState(state) {
       isAiming = state;
@@ -450,10 +630,32 @@
       setAimState(!isAiming);
     });
 
+    sprintBtn.addEventListener('touchstart', (e) => {
+      e.stopPropagation();
+      isSprinting = !isSprinting;
+      sprintBtn.classList.toggle('active', isSprinting);
+    });
+
+    shieldBtn.addEventListener('touchstart', (e) => {
+      e.stopPropagation();
+      shieldActive = !shieldActive;
+      shieldBtn.classList.toggle('active', shieldActive);
+    });
+
+    grenadeBtn.addEventListener('touchstart', (e) => {
+      e.stopPropagation();
+      if (grenadeCount > 0) {
+        throwGrenade();
+      }
+    });
+
     const bullets = [];
+    const grenades = [];
+
     function shoot() {
       if (shootCooldown > 0) return;
       
+      const weapon = weapons[currentWeapon];
       const bullet = new THREE.Mesh(
         new THREE.SphereGeometry(0.22, 6, 6),
         new THREE.MeshBasicMaterial({ color: 0xfff200 })
@@ -472,11 +674,35 @@
       const dir = new THREE.Vector3();
       camera.getWorldDirection(dir);
 
-      bullets.push({ mesh: bullet, direction: dir, life: 90 });
+      bullets.push({ mesh: bullet, direction: dir, life: 90, damage: weapon.damage });
       scene.add(bullet);
 
       recoilAnim = 0.12;
-      shootCooldown = 10;
+      shootCooldown = weapon.fireRate;
+    }
+
+    function throwGrenade() {
+      if (grenadeCount <= 0) return;
+
+      grenadeCount--;
+      grenadeCountElem.textContent = grenadeCount;
+
+      const grenade = new THREE.Mesh(
+        new THREE.SphereGeometry(0.4, 8, 8),
+        new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+      );
+
+      const spawnPos = new THREE.Vector3();
+      camera.getWorldPosition(spawnPos);
+      grenade.position.copy(spawnPos);
+
+      const dir = new THREE.Vector3();
+      camera.getWorldDirection(dir);
+      dir.multiplyScalar(0.3);
+      dir.y = 0.2;
+
+      grenades.push({ mesh: grenade, velocity: dir, life: 180, exploded: false });
+      scene.add(grenade);
     }
 
     document.getElementById('shoot-btn').addEventListener('touchstart', (e) => {
@@ -486,12 +712,12 @@
     });
 
     // ============================================
-    // 7. CONTROLES
+    // 10. CONTROLES
     // ============================================
     let playerRotationY = 0;
     let cameraPitch = 0.2;
     const cameraDistance = 6.5;
-    const moveSpeed = 0.20;
+    let moveSpeed = 0.20;
 
     let moveInput = { x: 0, y: 0 };
     let leftTouchId = null;
@@ -564,9 +790,6 @@
     window.addEventListener('touchend', (e) => {
       for (let touch of e.changedTouches) resetTouch(touch.identifier);
     });
-    window.addEventListener('touchcancel', (e) => {
-      for (let touch of e.changedTouches) resetTouch(touch.identifier);
-    });
 
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
@@ -575,22 +798,26 @@
     });
 
     // ============================================
-    // 8. BUCLE PRINCIPAL
+    // 11. BUCLE PRINCIPAL
     // ============================================
     let walkCycle = 0;
 
     function animate() {
       requestAnimationFrame(animate);
 
-      // Decrementar cooldowns
       if (shootCooldown > 0) shootCooldown--;
+      if (speedBoost > 0) speedBoost--;
+      else moveSpeed = 0.20;
 
-      // Brisa en el césped
-      const time = Date.now() * 0.003;
-      grassTufts.forEach((tuft, idx) => { tuft.rotation.z = Math.sin(time + idx) * 0.12; });
+      grassTufts.forEach((tuft, idx) => { 
+        const time = Date.now() * 0.003;
+        tuft.rotation.z = Math.sin(time + idx) * 0.12; 
+      });
 
-      // Movimiento del jugador
+      // Movimiento
       const isMoving = (moveInput.x !== 0 || moveInput.y !== 0);
+      const currentMoveSpeed = isSprinting && isMoving ? moveSpeed * 1.75 : moveSpeed;
+
       if (isMoving) {
         const forward = -moveInput.y;
         const strafe = moveInput.x;
@@ -599,8 +826,8 @@
         const dz = forward * Math.cos(playerRotationY) - strafe * Math.sin(playerRotationY);
         const speedMultiplier = Math.min(1, Math.hypot(moveInput.x, moveInput.y));
 
-        player.group.position.x += dx * moveSpeed * speedMultiplier;
-        player.group.position.z += dz * moveSpeed * speedMultiplier;
+        player.group.position.x += dx * currentMoveSpeed * speedMultiplier;
+        player.group.position.z += dz * currentMoveSpeed * speedMultiplier;
 
         if (!isAiming) {
           player.group.rotation.y = Math.atan2(dx, dz);
@@ -608,7 +835,6 @@
           player.group.rotation.y = playerRotationY;
         }
 
-        // Animación de caminata
         walkCycle += 0.22;
         player.leftLeg.rotation.x = Math.sin(walkCycle) * 0.6;
         player.rightLeg.rotation.x = -Math.sin(walkCycle) * 0.6;
@@ -628,7 +854,7 @@
 
       player.group.position.y = getTerrainHeight(player.group.position.x, player.group.position.z);
 
-      // Posicionamiento de cámara
+      // Cámara
       if (isAiming) {
         fpsGunGroup.visible = true;
         const targetPos = new THREE.Vector3();
@@ -657,17 +883,17 @@
         camera.lookAt(player.group.position.x, player.group.position.y + 1.6, player.group.position.z);
       }
 
-      // Disparos y colisiones
+      // Disparos
       for (let i = bullets.length - 1; i >= 0; i--) {
         const b = bullets[i];
-        b.mesh.position.add(b.direction.clone().multiplyScalar(0.8));
+        b.mesh.position.add(b.direction.clone().multiplyScalar(b.mesh.velocity || 0.8));
         b.life--;
 
         for (let j = targets.length - 1; j >= 0; j--) {
           const target = targets[j];
           const dist = b.mesh.position.distanceTo(target.group.position);
           if (dist < 1.5) {
-            target.health -= 25;
+            target.health -= b.damage;
             scene.remove(b.mesh);
             bullets.splice(i, 1);
 
@@ -676,8 +902,13 @@
               targets.splice(j, 1);
               score++;
               scoreElem.textContent = score;
+              createExplosion(target.group.position);
               
-              // Respawnear enemigo
+              if (Math.random() > 0.7) {
+                const types = ['health', 'shield', 'ammo', 'speed'];
+                createPowerUp(types[Math.floor(Math.random() * types.length)], target.group.position.x, target.group.position.z);
+              }
+
               if (targets.length < initialBotCount) {
                 spawnBot();
               }
@@ -692,7 +923,72 @@
         }
       }
 
-      // IA de Bots - persiguen y atacan al jugador
+      // Granadas
+      for (let i = grenades.length - 1; i >= 0; i--) {
+        const g = grenades[i];
+        g.mesh.position.add(g.velocity);
+        g.velocity.y -= 0.01;
+        g.mesh.rotation.x += 0.1;
+        g.mesh.rotation.y += 0.1;
+        g.life--;
+
+        if (g.life < 0 && !g.exploded) {
+          g.exploded = true;
+          createExplosion(g.mesh.position, 2);
+
+          for (let j = targets.length - 1; j >= 0; j--) {
+            const target = targets[j];
+            const dist = g.mesh.position.distanceTo(target.group.position);
+            if (dist < 5) {
+              target.health -= 50;
+              if (target.health <= 0) {
+                scene.remove(target.group);
+                targets.splice(j, 1);
+                score += 2;
+                scoreElem.textContent = score;
+                spawnBot();
+              }
+            }
+          }
+
+          scene.remove(g.mesh);
+          grenades.splice(i, 1);
+        }
+      }
+
+      // Partículas
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.position.add(p.velocity);
+        p.velocity.y -= 0.02;
+        p.life--;
+
+        if (p.life < 0) {
+          scene.remove(p);
+          particles.splice(i, 1);
+        }
+      }
+
+      // Power-ups
+      for (let i = powerups.length - 1; i >= 0; i--) {
+        const pu = powerups[i];
+        pu.mesh.rotation.x += 0.03;
+        pu.mesh.rotation.y += 0.05;
+        pu.mesh.position.y += Math.sin(Date.now() * 0.003 + i) * 0.02;
+        pu.life--;
+
+        const dist = player.group.position.distanceTo(pu.mesh.position);
+        if (dist < 2) {
+          pu.effect();
+          scene.remove(pu.mesh);
+          powerups.splice(i, 1);
+        } else if (pu.life < 0) {
+          scene.remove(pu.mesh);
+          powerups.splice(i, 1);
+        }
+      }
+
+      // IA Bots
       targets.forEach((bot, idx) => {
         const dx = player.group.position.x - bot.group.position.x;
         const dz = player.group.position.z - bot.group.position.z;
@@ -704,21 +1000,32 @@
           bot.group.position.y = getTerrainHeight(bot.group.position.x, bot.group.position.z);
           bot.group.rotation.y = Math.atan2(dx, dz);
 
-          // Animación de movimiento
           walkCycle += 0.15;
           bot.leftLeg.rotation.x = Math.sin(walkCycle + idx) * 0.5;
           bot.rightLeg.rotation.x = -Math.sin(walkCycle + idx) * 0.5;
 
-          // Daño si están cerca
           if (dist < 2) {
-            playerHealth -= 0.3;
+            if (!shieldActive) {
+              playerHealth -= 0.3;
+            } else {
+              playerShield -= 0.5;
+              if (playerShield <= 0) {
+                playerShield = 0;
+                shieldActive = false;
+                shieldBtn.classList.remove('active');
+              }
+            }
           }
         }
       });
 
-      // Actualizar barra de salud
+      // UI
       healthFill.style.width = Math.max(0, playerHealth) + '%';
+      shieldFill.style.width = Math.max(0, playerShield) + '%';
+      sprintFill.style.width = (speedBoost / 150 * 100) + '%';
       enemyCountElem.textContent = targets.length;
+      grenadeCountElem.textContent = `x${grenadeCount}`;
+      weaponNameDisplay.textContent = weapons[currentWeapon].name;
 
       if (playerHealth <= 0) {
         alert(`¡GAME OVER! 🎮\n\nPuntuación: ${score}\nEnemigos eliminados: ${score}`);

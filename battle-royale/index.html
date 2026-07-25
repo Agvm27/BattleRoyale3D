@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battle Royale 3D - Zombie Survival</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            background: #000;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100vh;
+        }
+
+        /* MENÚS */
+        .menu-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            flex-direction: column;
+        }
+
+        .menu-container.hidden {
+            display: none;
+        }
+
+        .menu-title {
+            color: #00ff00;
+            font-size: 48px;
+            margin-bottom: 40px;
+            text-shadow: 0 0 20px #00ff00;
+            font-weight: bold;
+        }
+
+        .menu-content {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 40px;
+            border-radius: 10px;
+            border: 2px solid #00ff00;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .menu-section {
+            margin-bottom: 30px;
+        }
+
+        .menu-section h3 {
+            color: #00ff00;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .character-grid, .weapon-grid, .ability-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .character-item, .weapon-item, .ability-item {
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid #00ff00;
+            padding: 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            color: #00ff00;
+            font-size: 12px;
+        }
+
+        .character-item:hover, .weapon-item:hover, .ability-item:hover {
+            background: rgba(0, 255, 0, 0.3);
+            transform: scale(1.05);
+        }
+
+        .character-item.selected, .weapon-item.selected, .ability-item.selected {
+            background: rgba(0, 255, 0, 0.5);
+            border-color: #ffff00;
+            box-shadow: 0 0 10px #00ff00;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #00ff00 0%, #00cc00 100%);
+            color: #000;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #00cc00 0%, #009900 100%);
+            box-shadow: 0 0 20px #00ff00;
+            transform: scale(1.05);
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        /* HUD */
+        #hud {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border: 2px solid #00ff00;
+            border-radius: 5px;
+            min-width: 250px;
+        }
+
+        #hud-stats {
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .stat-label {
+            color: #ffff00;
+            font-weight: bold;
+        }
+
+        /* INVENTARIO */
+        #inventory {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ff00;
+            padding: 15px;
+            border-radius: 5px;
+            max-width: 300px;
+            max-height: 200px;
+            overflow-y: auto;
+            color: #00ff00;
+            z-index: 100;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .inventory-item {
+            background: rgba(0, 255, 0, 0.1);
+            padding: 8px;
+            margin-bottom: 5px;
+            border-left: 3px solid #00ff00;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .inventory-item:hover {
+            background: rgba(0, 255, 0, 0.3);
+            transform: translateX(5px);
+        }
+
+        /* WAVE ALERT */
+        #wave-alert {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 0, 0, 0.9);
+            color: #fff;
+            padding: 30px 50px;
+            border-radius: 10px;
+            font-size: 32px;
+            font-weight: bold;
+            text-shadow: 0 0 10px #ff0000;
+            display: none;
+            z-index: 200;
+            animation: pulse 0.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        /* GAME OVER */
+        #game-over {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 500;
+            flex-direction: column;
+        }
+
+        #game-over.show {
+            display: flex;
+        }
+
+        .game-over-content {
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid #ff0000;
+            padding: 50px;
+            border-radius: 10px;
+            text-align: center;
+            color: #00ff00;
+        }
+
+        .game-over-title {
+            font-size: 48px;
+            color: #ff0000;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #ff0000;
+        }
+
+        .game-over-stats {
+            font-size: 18px;
+            margin: 20px 0;
+            color: #ffff00;
+        }
+
+        /* MINIMAP */
+        #minimap {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 200px;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ff00;
+            border-radius: 5px;
+            z-index: 100;
+        }
+
+        /* CONTROLES INFO */
+        #controls {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border: 2px solid #00ff00;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 100;
+        }
+
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            flex-direction: column;
+        }
+
+        .loading-screen.hidden {
+            display: none;
+        }
+
+        .loading-text {
+            color: #00ff00;
+            font-size: 24px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .loading-bar {
+            width: 300px;
+            height: 30px;
+            background: rgba(0, 255, 0, 0.2);
+            border: 2px solid #00ff00;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff00 0%, #00cc00 100%);
+            width: 0%;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-text">⚙️ Inicializando Battle Royale 3D...</div>
+        <div class="loading-bar">
+            <div class="loading-progress" id="loadingProgress"></div>
+        </div>
+    </div>
+
+    <!-- MENÚ PRINCIPAL -->
+    <div class="menu-container" id="mainMenu">
+        <div class="menu-title">🎮 BATTLE ROYALE 3D</div>
+        <div class="menu-content">
+            <!-- SELECCIÓN DE PERSONAJE -->
+            <div class="menu-section">
+                <h3>👥 Selecciona tu Personaje</h3>
+                <div class="character-grid" id="characterGrid"></div>
+            </div>
+
+            <!-- SELECCIÓN DE ARMA -->
+            <div class="menu-section">
+                <h3>🔫 Selecciona tu Arma Inicial</h3>
+                <div class="weapon-grid" id="weaponGrid"></div>
+            </div>
+
+            <!-- SELECCIÓN DE HABILIDAD -->
+            <div class="menu-section">
+                <h3>⚡ Selecciona tu Habilidad</h3>
+                <div class="ability-grid" id="abilityGrid"></div>
+            </div>
+
+            <!-- BOTONES -->
+            <div class="btn-group">
+                <button class="btn" id="startGameBtn">🎮 Iniciar Juego</button>
+                <button class="btn" id="settingsBtn">⚙️ Configuración</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GAME OVER -->
+    <div id="game-over">
+        <div class="game-over-content">
+            <div class="game-over-title">💀 GAME OVER</div>
+            <div class="game-over-stats">
+                <div>Zombies Derrotados: <span id="finalZombiesKilled">0</span></div>
+                <div>Tiempo Sobrevivido: <span id="finalSurvivalTime">0s</span></div>
+                <div>Puntuación: <span id="finalScore">0</span></div>
+            </div>
+            <div class="btn-group">
+                <button class="btn" id="retryBtn">🔄 Jugar Nuevamente</button>
+                <button class="btn" id="menuBtn">📋 Menú Principal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HUD IN-GAME -->
+    <div id="hud" class="hidden">
+        <div id="hud-stats">
+            <div><span class="stat-label">❤️ VIDA:</span> <span id="healthValue">100</span>%</div>
+            <div><span class="stat-label">🛡️ ARMADURA:</span> <span id="armorValue">0</span>%</div>
+            <div><span class="stat-label">💰 MUNICIÓN:</span> <span id="ammoValue">30</span></div>
+            <div><span class="stat-label">🎯 ARMA:</span> <span id="weaponName">-</span></div>
+            <div><span class="stat-label">⚡ HABILIDAD:</span> <span id="abilityName">-</span></div>
+            <div><span class="stat-label">🧟 ZOMBIES:</span> <span id="zombieCount">0</span></div>
+            <div><span class="stat-label">📍 POS:</span> <span id="posValue">0, 0</span></div>
+            <div><span class="stat-label">⏱️ TIEMPO:</span> <span id="timeValue">0s</span></div>
+            <div><span class="stat-label">🌊 OLEADA:</span> <span id="waveValue">1</span></div>
+        </div>
+    </div>
+
+    <!-- INVENTARIO -->
+    <div id="inventory" class="hidden">
+        <strong>📦 INVENTARIO</strong>
+        <div id="inventoryItems"></div>
+    </div>
+
+    <!-- ALERTA DE OLEADA -->
+    <div id="wave-alert">⚠️ ¡OLEADA DE ZOMBIES!</div>
+
+    <!-- MINIMAP -->
+    <canvas id="minimap" class="hidden"></canvas>
+
+    <!-- CONTROLES -->
+    <div id="controls" class="hidden">
+        <strong>🎮 CONTROLES</strong><br>
+        W/A/S/D - Movimiento<br>
+        MOUSE - Mirar<br>
+        CLICK - Disparar<br>
+        ESPACIO - Saltar<br>
+        SHIFT - Sprint<br>
+        E - Recoger Items<br>
+        Q - Usar Habilidad<br>
+        R - Recargar<br>
+        TAB - Inventario
+    </div>
+
+    <!-- CANVAS PRINCIPAL -->
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        // ============================================
+        // CONFIGURACIÓN Y CONSTANTES
+        // ============================================
+
+        const CHARACTERS = [
+            { id: 1, name: 'Soldado', color: '#00aa00', speed: 1.0, health: 100, armor: 0 },
+            { id: 2, name: 'Asesino', color: '#aa0000', speed: 1.3, health: 80, armor: 0 },
+            { id: 3, name: 'Tanque', color: '#0000aa', speed: 0.7, health: 150, armor: 30 },
+            { id: 4, name: 'Médico', color: '#ffff00', speed: 1.1, health: 90, armor: 10 },
+            { id: 5, name: 'Ingeniero', color: '#ff8800', speed: 0.9, health: 95, armor: 20 },
+            { id: 6, name: 'Explorador', color: '#00ffff', speed: 1.4, health: 75, armor: 0 },
+            { id: 7, name: 'Francotirador', color: '#cccccc', speed: 0.85, health: 85, armor: 5 },
+            { id: 8, name: 'Berserker', color: '#ff0000', speed: 1.2, health: 120, armor: 15 },
+            { id: 9, name: 'Fantasma', color: '#888888', speed: 1.15, health: 70, armor: 0 },
+            { id: 10, name: 'Guardián', color: '#ffaa00', speed: 0.8, health: 130, armor: 35 },
+            { id: 11, name: 'Ninja', color: '#220022', speed: 1.35, health: 65, armor: 0 },
+            { id: 12, name: 'Paladín', color: '#ffff00', speed: 0.9, health: 140, armor: 40 },
+            { id: 13, name: 'Mago', color: '#aa00ff', speed: 1.1, health: 75, armor: 10 },
+            { id: 14, name: 'Cazador', color: '#00aa88', speed: 1.25, health: 90, armor: 5 },
+            { id: 15, name: 'Ciborg', color: '#0088ff', speed: 1.0, health: 100, armor: 25 }
+        ];
+
+        const WEAPONS = [
+            { id: 1, name: 'Pistola', damage: 25, fireRate: 0.1, ammo: 30, range: 300, spread: 0.1 },
+            { id: 2, name: 'Rifle', damage: 50, fireRate: 0.3, ammo: 20, range: 500, spread: 0.05 },
+            { id: 3, name: 'Escopeta', damage: 80, fireRate: 0.5, ammo: 8, range: 150, spread: 0.3 },
+            { id: 4, name: 'Metralleta', damage: 20, fireRate: 0.05, ammo: 60, range: 250, spread: 0.15 },
+            { id: 5, name: 'Lanzallamas', damage: 40, fireRate: 0.2, ammo: 15, range: 200, spread: 0.2 }
+        ];
+
+        const ABILITIES = [
+            { id: 1, name: 'Escudo', cooldown: 15, effect: 'armor', value: 50 },
+            { id: 2, name: 'Velocidad', cooldown: 20, effect: 'speed', value: 1.5 },
+            { id: 3, name: 'Curación', cooldown: 10, effect: 'heal', value: 50 },
+            { id: 4, name: 'Explosión', cooldown: 25, effect: 'explosion', value: 100 },
+            { id: 5, name: 'Visión', cooldown: 30, effect: 'vision', value: 1000 }
+        ];
+
+        const ZOMBIES = [
+            { id: 1, name: 'Zombie Común', health: 30, speed: 0.8, damage: 10, size: 20 },
+            { id: 2, name: 'Zombie Rápido', health: 20, speed: 1.5, damage: 8, size: 15 },
+            { id: 3, name: 'Zombie Fuerte', health: 60, speed: 0.6, damage: 20, size: 30 },
+            { id: 4, name: 'Zombie Tanque', health: 100, speed: 0.4, damage: 25, size: 35 },
+            { id: 5, name: 'Zombie Mutante', health: 45, speed: 1.2, damage: 15, size: 25 },
+            { id: 6, name: 'Zombie Volador', health: 35, speed: 1.4, damage: 12, size: 18 },
+            { id: 7, name: 'Zombie Explosivo', health: 25, speed: 0.7, damage: 30, size: 22 },
+            { id: 8, name: 'Zombie Parásito', health: 40, speed: 1.3, damage: 18, size: 19 },
+            { id: 9, name: 'Zombie Corrupto', health: 55, speed: 1.0, damage: 22, size: 28 },
+            { id: 10, name: 'Zombie Anciano', health: 80, speed: 0.5, damage: 28, size: 32 }
+        ];
+
+        // ============================================
+        // VARIABLES GLOBALES
+        // ============================================
+
+        let gameState = {
+            running: false,
+            paused: false,
+            selectedCharacter: null,
+            selectedWeapon: null,
+            selectedAbility: null,
+            menuOpen: true,
+            gameOverOpen: false
+        };
+
+        let player = {
+            x: 1500,
+            y: 1500,
+            vx: 0,
+            vy: 0,
+            angle: 0,
+            health: 100,
+            armor: 0,
+            ammo: 30,
+            maxAmmo: 30,
+            character: null,
+            weapon: null,
+            ability: null,
+            speed: 1,
+            size: 20,
+            isJumping: false,
+            jumpPower: 0,
+            inventory: [],
+            kills: 0,
+            startTime: 0
+        };
+
+        let gameData = {
+            zombies: [],
+            items: [],
+            particles: [],
+            currentWave: 1,
+            waveTimer: 0,
+            waveInterval: 30,
+            waveSpawnCount: 5,
+            mapWidth: 3000,
+            mapHeight: 3000,
+            lastZombieSpawnTime: 0
+        };
+
+        let input = {
+            keys: {},
+            mouse: { x: 0, y: 0, clicked: false }
+        };
+
+        let canvas, ctx, minimapCanvas, minimapCtx;
+
+        // ============================================
+        // INICIALIZACIÓN
+        // ============================================
+
+        window.addEventListener('load', () => {
+            initializeGame();
+            updateLoadingProgress(30);
+            setTimeout(() => {
+                setupMenus();
+                updateLoadingProgress(60);
+            }, 100);
+            setTimeout(() => {
+                setupEventListeners();
+                updateLoadingProgress(100);
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').classList.add('hidden');
+                }, 500);
+            }, 200);
+        });
+
+        function initializeGame() {
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d', { alpha: false });
+            minimapCanvas = document.getElementById('minimap');
+            minimapCtx = minimapCanvas.getContext('2d');
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            minimapCanvas.width = 200;
+            minimapCanvas.height = 200;
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        }
+
+        function updateLoadingProgress(percent) {
+            document.getElementById('loadingProgress').style.width = percent + '%';
+        }
+
+        function setupMenus() {
+            setupCharacterMenu();
+            setupWeaponMenu();
+            setupAbilityMenu();
+        }
+
+        function setupCharacterMenu() {
+            const grid = document.getElementById('characterGrid');
+            grid.innerHTML = '';
+            CHARACTERS.forEach(char => {
+                const item = document.createElement('div');
+                item.className = 'character-item';
+                item.innerHTML = `<div>${char.name}</div><small>❤️ ${char.health}</small>`;
+                item.addEventListener('click', () => selectCharacter(char, item));
+                grid.appendChild(item);
+            });
+        }
+
+        function setupWeaponMenu() {
+            const grid = document.getElementById('weaponGrid');
+            grid.innerHTML = '';
+            WEAPONS.forEach(weapon => {
+                const item = document.createElement('div');
+                item.className = 'weapon-item';
+                item.innerHTML = `<div>${weapon.name}</div><small>💥 ${weapon.damage}</small>`;
+                item.addEventListener('click', () => selectWeapon(weapon, item));
+                grid.appendChild(item);
+            });
+        }
+
+        function setupAbilityMenu() {
+            const grid = document.getElementById('abilityGrid');
+            grid.innerHTML = '';
+            ABILITIES.forEach(ability => {
+                const item = document.createElement('div');
+                item.className = 'ability-item';
+                item.innerHTML = `<div>${ability.name}</div><small>⏱️ ${ability.cooldown}s</small>`;
+                item.addEventListener('click', () => selectAbility(ability, item));
+                grid.appendChild(item);
+            });
+        }
+
+        function selectCharacter(char, element) {
+            document.querySelectorAll('.character-item').forEach(e => e.classList.remove('selected'));
+            element.classList.add('selected');
+            gameState.selectedCharacter = { ...char };
+            player.speed = char.speed;
+            player.health = char.health;
+            player.armor = char.armor;
+        }
+
+        function selectWeapon(weapon, element) {
+            document.querySelectorAll('.weapon-item').forEach(e => e.classList.remove('selected'));
+            element.classList.add('selected');
+            gameState.selectedWeapon = { ...weapon };
+            player.ammo = weapon.ammo;
+            player.maxAmmo = weapon.ammo;
+        }
+
+        function selectAbility(ability, element) {
+            document.querySelectorAll('.ability-item').forEach(e => e.classList.remove('selected'));
+            element.classList.add('selected');
+            gameState.selectedAbility = { ...ability };
+        }
+
+        function setupEventListeners() {
+            document.getElementById('startGameBtn').addEventListener('click', startGame);
+            document.getElementById('retryBtn').addEventListener('click', restartGame);
+            document.getElementById('menuBtn').addEventListener('click', backToMenu);
+
+            window.addEventListener('keydown', (e) => {
+                input.keys[e.key.toLowerCase()] = true;
+                if (e.key === 'q') useAbility();
+                if (e.key === 'r') reloadWeapon();
+            });
+
+            window.addEventListener('keyup', (e) => {
+                input.keys[e.key.toLowerCase()] = false;
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                input.mouse.x = e.clientX;
+                input.mouse.y = e.clientY;
+            });
+
+            document.addEventListener('click', () => {
+                input.mouse.clicked = true;
+            });
+        }
+
+        function startGame() {
+            if (!gameState.selectedCharacter || !gameState.selectedWeapon || !gameState.selectedAbility) {
+                alert('⚠️ Debes seleccionar personaje, arma y habilidad');
+                return;
+            }
+
+            player.character = gameState.selectedCharacter;
+            player.weapon = gameState.selectedWeapon;
+            player.ability = gameState.selectedAbility;
+            player.health = player.character.health;
+            player.armor = player.character.armor;
+            player.ammo = player.weapon.ammo;
+            player.maxAmmo = player.weapon.ammo;
+            player.kills = 0;
+            player.startTime = Date.now();
+
+            gameData.zombies = [];
+            gameData.items = [];
+            gameData.particles = [];
+            gameData.currentWave = 1;
+            gameData.waveTimer = 0;
+
+            document.getElementById('mainMenu').classList.add('hidden');
+            document.getElementById('hud').classList.remove('hidden');
+            document.getElementById('inventory').classList.remove('hidden');
+            document.getElementById('controls').classList.remove('hidden');
+            document.getElementById('minimap').classList.remove('hidden');
+            document.getElementById('game-over').classList.remove('show');
+
+            gameState.running = true;
+            gameState.menuOpen = false;
+
+            gameLoop();
+        }
+
+        function restartGame() {
+            document.getElementById('game-over').classList.remove('show');
+            document.getElementById('mainMenu').classList.remove('hidden');
+            gameState.running = false;
+            gameState.menuOpen = true;
+            player.x = 1500;
+            player.y = 1500;
+        }
+
+        function backToMenu() {
+            document.getElementById('game-over').classList.remove('show');
+            document.getElementById('mainMenu').classList.remove('hidden');
+            gameState.running = false;
+            gameState.menuOpen = true;
+        }
+
+        // ============================================
+        // GAME LOOP
+        // ============================================
+
+        function gameLoop() {
+            if (!gameState.running) return;
+
+            // Update
+            updatePlayer();
+            updateZombies();
+            updateParticles();
+            updateWaves();
+            updateHUD();
+
+            // Render
+            render();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function updatePlayer() {
+            // Movimiento
+            let moveX = 0, moveY = 0;
+            const isSprinting = input.keys['shift'];
+            const speed = player.speed * (isSprinting ? 1.5 : 1) * (input.keys['shift'] ? 0.1 : 0.05);
+
+            if (input.keys['w']) moveY -= speed;
+            if (input.keys['s']) moveY += speed;
+            if (input.keys['a']) moveX -= speed;
+            if (input.keys['d']) moveX += speed;
+
+            player.x += moveX;
+            player.y += moveY;
+
+            // Limites del mapa
+            player.x = Math.max(player.size, Math.min(gameData.mapWidth - player.size, player.x));
+            player.y = Math.max(player.size, Math.min(gameData.mapHeight - player.size, player.y));
+
+            // Ángulo hacia el mouse
+            const dx = input.mouse.x - canvas.width / 2;
+            const dy = input.mouse.y - canvas.height / 2;
+            player.angle = Math.atan2(dy, dx);
+
+            // Disparar
+            if (input.mouse.clicked && player.ammo > 0) {
+                shoot();
+                input.mouse.clicked = false;
+            }
+        }
+
+        function shoot() {
+            if (player.ammo <= 0) return;
+
+            player.ammo--;
+
+            // Crear proyectil
+            const spread = (Math.random() - 0.5) * player.weapon.spread;
+            const bulletAngle = player.angle + spread;
+            const bullet = {
+                x: player.x + Math.cos(player.angle) * 30,
+                y: player.y + Math.sin(player.angle) * 30,
+                vx: Math.cos(bulletAngle) * 10,
+                vy: Math.sin(bulletAngle) * 10,
+                damage: player.weapon.damage,
+                range: player.weapon.range,
+                distTraveled: 0
+            };
+
+            gameData.particles.push(bullet);
+
+            // Partículas de fuego
+            for (let i = 0; i < 3; i++) {
+                gameData.particles.push({
+                    x: player.x + Math.cos(player.angle) * 20,
+                    y: player.y + Math.sin(player.angle) * 20,
+                    vx: (Math.random() - 0.5) * 5,
+                    vy: (Math.random() - 0.5) * 5,
+                    life: 0.5,
+                    maxLife: 0.5,
+                    type: 'muzzleFlash'
+                });
+            }
+        }
+
+        function reloadWeapon() {
+            player.ammo = player.maxAmmo;
+        }
+
+        function useAbility() {
+            if (!player.ability) return;
+
+            switch (player.ability.effect) {
+                case 'armor':
+                    player.armor += player.ability.value;
+                    break;
+                case 'speed':
+                    player.speed *= player.ability.value;
+                    setTimeout(() => { player.speed = gameState.selectedCharacter.speed; }, 5000);
+                    break;
+                case 'heal':
+                    player.health = Math.min(player.character.health, player.health + player.ability.value);
+                    break;
+                case 'explosion':
+                    createExplosion(player.x, player.y, player.ability.value);
+                    break;
+            }
+        }
+
+        function createExplosion(x, y, radius) {
+            for (let zombie of gameData.zombies) {
+                const dist = Math.hypot(zombie.x - x, zombie.y - y);
+                if (dist < radius) {
+                    zombie.health -= 50;
+                    const angle = Math.atan2(zombie.y - y, zombie.x - x);
+                    zombie.vx = Math.cos(angle) * 5;
+                    zombie.vy = Math.sin(angle) * 5;
+                }
+            }
+        }
+
+        function updateZombies() {
+            for (let i = gameData.zombies.length - 1; i >= 0; i--) {
+                const zombie = gameData.zombies[i];
+
+                // IA: perseguir al jugador
+                const dx = player.x - zombie.x;
+                const dy = player.y - zombie.y;
+                const dist = Math.hypot(dx, dy);
+
+                if (dist < 500) {
+                    const angle = Math.atan2(dy, dx);
+                    zombie.vx = Math.cos(angle) * zombie.speed * 0.03;
+                    zombie.vy = Math.sin(angle) * zombie.speed * 0.03;
+                }
+
+                zombie.x += zombie.vx;
+                zombie.y += zombie.vy;
+
+                // Límites
+                zombie.x = Math.max(zombie.size, Math.min(gameData.mapWidth - zombie.size, zombie.x));
+                zombie.y = Math.max(zombie.size, Math.min(gameData.mapHeight - zombie.size, zombie.y));
+
+                // Colisión con jugador
+                if (dist < player.size + zombie.size) {
+                    const damage = zombie.damage;
+                    if (player.armor > 0) {
+                        player.armor -= damage;
+                    } else {
+                        player.health -= damage;
+                    }
+
+                    if (player.health <= 0) {
+                        endGame();
+                    }
+                }
+
+                // Colisiones con proyectiles
+                for (let j = gameData.particles.length - 1; j >= 0; j--) {
+                    const particle = gameData.particles[j];
+                    if (particle.damage) {
+                        const bulletDist = Math.hypot(zombie.x - particle.x, zombie.y - particle.y);
+                        if (bulletDist < zombie.size) {
+                            zombie.health -= particle.damage;
+                            gameData.particles.splice(j, 1);
+
+                            if (zombie.health <= 0) {
+                                player.kills++;
+                                gameData.zombies.splice(i, 1);
+                                dropItem(zombie.x, zombie.y);
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        function updateParticles() {
+            for (let i = gameData.particles.length - 1; i >= 0; i--) {
+                const p = gameData.particles[i];
+
+                if (p.damage) {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.distTraveled += Math.hypot(p.vx, p.vy);
+
+                    if (p.distTraveled > p.range ||
+                        p.x < 0 || p.x > gameData.mapWidth ||
+                        p.y < 0 || p.y > gameData.mapHeight) {
+                        gameData.particles.splice(i, 1);
+                    }
+                } else if (p.type === 'muzzleFlash') {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.life -= 0.02;
+
+                    if (p.life <= 0) {
+                        gameData.particles.splice(i, 1);
+                    }
+                }
+            }
+        }
+
+        function updateWaves() {
+            gameData.waveTimer += 0.016; // ~60 FPS
+
+            if (gameData.waveTimer >= gameData.waveInterval) {
+                // Mostrar alerta
+                const alert = document.getElementById('wave-alert');
+                alert.style.display = 'block';
+                setTimeout(() => { alert.style.display = 'none'; }, 2000);
+
+                // Spawnear zombies
+                for (let i = 0; i < gameData.waveSpawnCount; i++) {
+                    spawnZombie();
+                }
+
+                gameData.currentWave++;
+                gameData.waveSpawnCount = Math.min(gameData.waveSpawnCount + 2, 20);
+                gameData.waveInterval = Math.max(gameData.waveInterval - 1, 15);
+                gameData.waveTimer = 0;
+            }
+        }
+
+        function spawnZombie() {
+            const zombieType = ZOMBIES[Math.floor(Math.random() * ZOMBIES.length)];
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 400 + Math.random() * 200;
+
+            const zombie = {
+                ...zombieType,
+                x: player.x + Math.cos(angle) * distance,
+                y: player.y + Math.sin(angle) * distance,
+                vx: 0,
+                vy: 0
+            };
+
+            gameData.zombies.push(zombie);
+        }
+
+        function dropItem(x, y) {
+            const items = [
+                { type: 'ammo', name: 'Munición', value: 30 },
+                { type: 'health', name: 'Kit Médico', value: 50 },
+                { type: 'armor', name: 'Chaleco', value: 30 }
+            ];
+
+            const item = items[Math.floor(Math.random() * items.length)];
+            item.x = x;
+            item.y = y;
+
+            gameData.items.push(item);
+        }
+
+        function pickupItem(item) {
+            switch (item.type) {
+                case 'ammo':
+                    player.ammo = Math.min(player.maxAmmo, player.ammo + item.value);
+                    break;
+                case 'health':
+                    player.health = Math.min(player.character.health, player.health + item.value);
+                    break;
+                case 'armor':
+                    player.armor = Math.min(100, player.armor + item.value);
+                    break;
+            }
+        }
+
+        function updateHUD() {
+            document.getElementById('healthValue').textContent = Math.ceil(player.health);
+            document.getElementById('armorValue').textContent = Math.ceil(player.armor);
+            document.getElementById('ammoValue').textContent = player.ammo;
+            document.getElementById('weaponName').textContent = player.weapon.name;
+            document.getElementById('abilityName').textContent = player.ability.name;
+            document.getElementById('zombieCount').textContent = gameData.zombies.length;
+            document.getElementById('posValue').textContent = `${Math.ceil(player.x)}, ${Math.ceil(player.y)}`;
+
+            const survivedTime = Math.floor((Date.now() - player.startTime) / 1000);
+            document.getElementById('timeValue').textContent = survivedTime + 's';
+            document.getElementById('waveValue').textContent = gameData.currentWave;
+
+            // Actualizar inventario
+            const invItems = document.getElementById('inventoryItems');
+            invItems.innerHTML = '';
+            gameData.items.forEach((item, idx) => {
+                const div = document.createElement('div');
+                div.className = 'inventory-item';
+                div.textContent = `${item.name} +${item.value}`;
+                div.addEventListener('click', () => {
+                    pickupItem(item);
+                    gameData.items.splice(idx, 1);
+                });
+                invItems.appendChild(div);
+            });
+        }
+
+        function endGame() {
+            gameState.running = false;
+            const survivedTime = Math.floor((Date.now() - player.startTime) / 1000);
+            const score = player.kills * 100 + survivedTime * 10;
+
+            document.getElementById('finalZombiesKilled').textContent = player.kills;
+            document.getElementById('finalSurvivalTime').textContent = survivedTime + 's';
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('game-over').classList.add('show');
+        }
+
+        // ============================================
+        // RENDERIZADO
+        // ============================================
+
+        function render() {
+            // Fondo
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Calcular offset de cámara
+            const cameraX = player.x - canvas.width / 2;
+            const cameraY = player.y - canvas.height / 2;
+
+            ctx.save();
+            ctx.translate(-cameraX, -cameraY);
+
+            // Fondo del mapa
+            ctx.fillStyle = '#1a3a1a';
+            ctx.fillRect(0, 0, gameData.mapWidth, gameData.mapHeight);
+
+            // Grid
+            ctx.strokeStyle = '#0a2a0a';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= gameData.mapWidth; i += 200) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, gameData.mapHeight);
+                ctx.stroke();
+            }
+            for (let i = 0; i <= gameData.mapHeight; i += 200) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(gameData.mapWidth, i);
+                ctx.stroke();
+            }
+
+            // Items
+            gameData.items.forEach(item => {
+                ctx.fillStyle = item.type === 'ammo' ? '#ffff00' : item.type === 'health' ? '#ff0000' : '#00ff00';
+                ctx.beginPath();
+                ctx.arc(item.x, item.y, 8, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Zombies
+            gameData.zombies.forEach(zombie => {
+                renderZombie(zombie);
+            });
+
+            // Proyectiles
+            gameData.particles.forEach(particle => {
+                if (particle.damage) {
+                    ctx.fillStyle = '#ffff00';
+                    ctx.beginPath();
+                    ctx.arc(particle.x, particle.y, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (particle.type === 'muzzleFlash') {
+                    ctx.fillStyle = `rgba(255, 150, 0, ${particle.life})`;
+                    ctx.beginPath();
+                    ctx.arc(particle.x, particle.y, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+
+            // Jugador
+            renderPlayer(player);
+
+            ctx.restore();
+
+            // Minimap
+            renderMinimap(cameraX, cameraY);
+        }
+
+        function renderPlayer(p) {
+            // Cuerpo
+            ctx.fillStyle = p.character.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Cabeza (articulación)
+            ctx.fillStyle = '#ffccaa';
+            ctx.beginPath();
+            ctx.arc(p.x + Math.cos(p.angle) * 12, p.y + Math.sin(p.angle) * 12, 8, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Arma
+            const gunX = p.x + Math.cos(p.angle) * 15;
+            const gunY = p.y + Math.sin(p.angle) * 15;
+            ctx.strokeStyle = '#888888';
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(gunX + Math.cos(p.angle) * 20, gunY + Math.sin(p.angle) * 20);
+            ctx.stroke();
+
+            // Salud
+            ctx.fillStyle = '#ff0000';
+            ctx.fillRect(p.x - 25, p.y - 40, 50, 5);
+            ctx.fillStyle = '#00ff00';
+            ctx.fillRect(p.x - 25, p.y - 40, 50 * (p.health / p.character.health), 5);
+        }
+
+        function renderZombie(zombie) {
+            // Cuerpo
+            ctx.fillStyle = `hsl(${Math.random() * 60 + 60}, 100%, 40%)`;
+            ctx.beginPath();
+            ctx.arc(zombie.x, zombie.y, zombie.size, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Brazo derecho
+            ctx.strokeStyle = '#00aa00';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(zombie.x, zombie.y);
+            ctx.lineTo(zombie.x + zombie.size * 1.2, zombie.y - zombie.size * 0.5);
+            ctx.stroke();
+
+            // Brazo izquierdo
+            ctx.beginPath();
+            ctx.moveTo(zombie.x, zombie.y);
+            ctx.lineTo(zombie.x - zombie.size * 1.2, zombie.y - zombie.size * 0.5);
+            ctx.stroke();
+
+            // Salud
+            ctx.fillStyle = '#ff0000';
+            ctx.fillRect(zombie.x - zombie.size, zombie.y - zombie.size - 15, zombie.size * 2, 4);
+            ctx.fillStyle = '#00ff00';
+            ctx.fillRect(zombie.x - zombie.size, zombie.y - zombie.size - 15, zombie.size * 2 * (zombie.health / ZOMBIES[0].health), 4);
+        }
+
+        function renderMinimap(camX, camY) {
+            minimapCtx.fillStyle = '#000';
+            minimapCtx.fillRect(0, 0, 200, 200);
+
+            const scale = 200 / gameData.mapWidth;
+
+            // Jugador
+            minimapCtx.fillStyle = '#00ff00';
+            minimapCtx.beginPath();
+            minimapCtx.arc(player.x * scale, player.y * scale, 3, 0, Math.PI * 2);
+            minimapCtx.fill();
+
+            // Zombies
+            minimapCtx.fillStyle = '#ff0000';
+            gameData.zombies.forEach(zombie => {
+                minimapCtx.beginPath();
+                minimapCtx.arc(zombie.x * scale, zombie.y * scale, 2, 0, Math.PI * 2);
+                minimapCtx.fill();
+            });
+
+            // Border
+            minimapCtx.strokeStyle = '#00ff00';
+            minimapCtx.lineWidth = 2;
+            minimapCtx.strokeRect(0, 0, 200, 200);
+        }
+    </script>
+</body>
+</html>
